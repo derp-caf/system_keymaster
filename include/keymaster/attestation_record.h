@@ -71,6 +71,7 @@ typedef struct km_auth_list {
     ASN1_INTEGER* user_auth_type;
     ASN1_INTEGER* auth_timeout;
     ASN1_NULL* allow_while_on_body;
+    ASN1_NULL* unlocked_device_required;
     ASN1_NULL* all_applications;
     ASN1_OCTET_STRING* application_id;
     ASN1_INTEGER* creation_date_time;
@@ -98,8 +99,7 @@ ASN1_SEQUENCE(KM_AUTH_LIST) = {
     ASN1_EXP_SET_OF_OPT(KM_AUTH_LIST, digest, ASN1_INTEGER, TAG_DIGEST.masked_tag()),
     ASN1_EXP_SET_OF_OPT(KM_AUTH_LIST, padding, ASN1_INTEGER, TAG_PADDING.masked_tag()),
     ASN1_EXP_OPT(KM_AUTH_LIST, caller_nonce, ASN1_NULL, TAG_CALLER_NONCE.masked_tag()),
-    ASN1_EXP_SET_OF_OPT(KM_AUTH_LIST, min_mac_length, ASN1_INTEGER,
-                        TAG_MIN_MAC_LENGTH.masked_tag()),
+    ASN1_EXP_OPT(KM_AUTH_LIST, min_mac_length, ASN1_INTEGER, TAG_MIN_MAC_LENGTH.masked_tag()),
     ASN1_EXP_SET_OF_OPT(KM_AUTH_LIST, kdf, ASN1_INTEGER, TAG_KDF.masked_tag()),
     ASN1_EXP_OPT(KM_AUTH_LIST, ec_curve, ASN1_INTEGER, TAG_EC_CURVE.masked_tag()),
     ASN1_EXP_OPT(KM_AUTH_LIST, rsa_public_exponent, ASN1_INTEGER,
@@ -168,9 +168,10 @@ ASN1_SEQUENCE(KM_KEY_DESCRIPTION) = {
 DECLARE_ASN1_FUNCTIONS(KM_KEY_DESCRIPTION);
 
 class AttestationRecordContext {
-protected:
+  protected:
     virtual ~AttestationRecordContext() {}
-public:
+
+  public:
     /**
      * Returns the security level (SW or TEE) of this keymaster implementation.
      */
@@ -187,9 +188,9 @@ public:
      * If you do not support device ID attestation, ignore all arguments and return
      * KM_ERROR_UNIMPLEMENTED.
      */
-    virtual keymaster_error_t VerifyAndCopyDeviceIds(
-        const AuthorizationSet& /* attestation_params */,
-        AuthorizationSet* /* attestation */) const {
+    virtual keymaster_error_t
+    VerifyAndCopyDeviceIds(const AuthorizationSet& /* attestation_params */,
+                           AuthorizationSet* /* attestation */) const {
         return KM_ERROR_UNIMPLEMENTED;
     }
     /**
